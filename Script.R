@@ -1,5 +1,7 @@
 library(tidyverse)
 library(chron)
+library(Hmisc)
+library(ggmap)
 
 ## Combine date and time into one column and arrange df by this new variable
 W = Traffic_W %>% 
@@ -38,16 +40,24 @@ W$`Contributed To Accident` =
 ## can have multiple observations referring to the same person)
 
 Single = distinct(W, DateTime, .keep_all = T)
+Single = filter(Single, !is.na(Color), Color != "NA")
 
 ## Create another data frame that only accounts for Accidents
 
 Single_Acc = Single %>% 
-  filter(`Contributed To Accident` == 1)
+  filter(`Contributed To Accident` == 1) %>% 
+  select(-`Contributed To Accident`)
 
 Single_Acc_T = separate(Single_Acc, DateTime, c("Date", "Time"), sep = " ")
 
 Single_Acc_T$Time = chron(times = Single_Acc_T$Time)
 
+## Summary of different Races
+Single_Acc_T %>% 
+  group_by(Race) %>% 
+  select(c(Belts, `Personal Injury`, 
+           `Property Damage`, Fatal, Alcohol, `Work Zone`)) %>% 
+  summarise_all(funs(mean))
 
 ## Distribution of accidents over the span of the day
 ggplot(Single_Acc_T, 
@@ -59,13 +69,18 @@ ggplot(Single_Acc_T,
 ## representation of different Races committing violations
 quickplot(Race, data = Single, fill = Race)
 
+## Time of the day against which different Races are in accidents
 ggplot(Single_Acc_T,
        aes(Race, Time, col = Color)) +
        geom_jitter(alpha = .4, width = .2) +
        scale_y_chron(format = "%H:%M:%S")
 
-## Map representation
+## error bar
+ggplot(Single, aes(factor(Alcohol), factor(Belts), col = Race, size = 4)) +
+  geom_jitter(alpha = .3 )
+  
 
+## Map representation
 Montgomery = get_map(location = geocode("Montgomery County"), 
                 source = "google", 
                 maptype = "roadmap", 
