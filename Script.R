@@ -75,10 +75,9 @@ ggplot(Single_Acc_T,
        geom_jitter(alpha = .4, width = .2) +
        scale_y_chron(format = "%H:%M:%S")
 
-## error bar
-ggplot(Single, aes(factor(Alcohol), factor(Belts), col = Race, size = 4)) +
-  geom_jitter(alpha = .3 )
-  
+## Intoxication vs Seatbelts
+ggplot(Single, aes(factor(Alcohol), factor(Belts), col = Race)) +
+  geom_jitter(alpha = .3, size = 4)
 
 ## Map representation
 Montgomery = get_map(location = geocode("Montgomery County"), 
