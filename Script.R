@@ -8,6 +8,10 @@ W = Traffic_W %>%
   unite(DateTime, Date, Time, sep = " ") %>% 
   arrange(as.POSIXct(DateTime, format = "%m/%d/%Y %H:%M:%S"))
 
+W = W %>% 
+  mutate(UI = 
+           as.numeric(grepl("alcohol", W$Description, ignore.case = T)))
+
 ## Turn Yes/No values to binary form for easier summary
 W$Belts =
   ifelse(grepl(pattern = "Yes", x = W$Belts),
@@ -41,6 +45,9 @@ W$`Contributed To Accident` =
 
 Single = distinct(W, DateTime, .keep_all = T)
 Single = filter(Single, !is.na(Color), Color != "NA")
+Single = Single %>% 
+  select(-Alcohol) %>% 
+  rename(Alcohol = "UI")
 
 ## Create another data frame that only accounts for Accidents
 
@@ -91,3 +98,9 @@ ggmap(Montgomery) +
              alpha = .1,
              size = 2,
              color = "Red")
+
+ggmap(Montgomery) +
+  geom_point(aes(Longitude, Latitude),
+             data = Alcohol,
+             alpha = .3,
+             size = 2)
