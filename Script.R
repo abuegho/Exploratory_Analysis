@@ -12,6 +12,9 @@ W = W %>%
   mutate(UI = 
            as.numeric(grepl("alcohol", W$Description, ignore.case = T)))
 
+Alcohol_T = separate(Alcohol, DateTime, c("Date", "Time"), sep = " ")
+Alcohol_T$Time = chron(times = Alcohol_T$Time)
+
 ## Turn Yes/No values to binary form for easier summary
 W$Belts =
   ifelse(grepl(pattern = "Yes", x = W$Belts),
@@ -75,7 +78,7 @@ ggplot(Single_Acc_T,
 
 ## representation of different Races committing violations
 quickplot(Race, data = Single, fill = Race)
-
+quickplot(Race, data = german, fill = Race)
 ## Time of the day against which different Races are in accidents
 ggplot(Single_Acc_T,
        aes(Race, Time, col = Color)) +
@@ -104,3 +107,9 @@ ggmap(Montgomery) +
              data = Alcohol,
              alpha = .3,
              size = 2)
+
+ggplot(Alcohol_T, aes(Date, Time)) + 
+  geom_line() + 
+  scale_y_chron(format = "%H:%M") + 
+  scale_x_continuous() +
+  coord_cartesian(xlim = c(0, 100))
