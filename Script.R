@@ -4,16 +4,17 @@ library(Hmisc)
 library(ggmap)
 
 ## Combine date and time into one column and arrange df by this new variable
-W = Traffic_W %>% 
-  unite(DateTime, Date, Time, sep = " ") %>% 
-  arrange(as.POSIXct(DateTime, format = "%m/%d/%Y %H:%M:%S"))
+W = Traffic_Violations %>% 
+  unite(DateTime, Date, Time, sep = " ", remove = F)
+
+# W$DateTime = strptime(W$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
+
+W = W[order(W$DateTime), ]
+W$Time = chron(times = W$Time)
 
 W = W %>% 
   mutate(UI = 
            as.numeric(grepl("alcohol", W$Description, ignore.case = T)))
-
-Alcohol_T = separate(Alcohol, DateTime, c("Date", "Time"), sep = " ")
-Alcohol_T$Time = chron(times = Alcohol_T$Time)
 
 ## Turn Yes/No values to binary form for easier summary
 W$Belts =
@@ -32,9 +33,6 @@ W$Fatal =
   ifelse(grepl(pattern = "Yes", x = W$Fatal),
          yes = print(1), no = print(0))
 
-W$Alcohol =
-  ifelse(grepl(pattern = "Yes", x = W$Alcohol),
-         yes = print(1), no = print(0))
 W$`Work Zone` =
   ifelse(grepl(pattern = "Yes", x = W$`Work Zone`),
          yes = print(1), no = print(0))
@@ -46,7 +44,7 @@ W$`Contributed To Accident` =
 ## Create a second data frame containing unique events (since original data set
 ## can have multiple observations referring to the same person)
 
-Single = distinct(W, DateTime, .keep_all = T)
+Single = distinct(W, DateTime, Location, Color, Model, Race, Gender, `Driver City`, .keep_all = T)
 Single = filter(Single, !is.na(Color), Color != "NA")
 Single = Single %>% 
   select(-Alcohol) %>% 
@@ -58,32 +56,46 @@ Single_Acc = Single %>%
   filter(`Contributed To Accident` == 1) %>% 
   select(-`Contributed To Accident`)
 
-Single_Acc_T = separate(Single_Acc, DateTime, c("Date", "Time"), sep = " ")
+## Create a data frame accounting for only alcohol-involved incidents
 
-Single_Acc_T$Time = chron(times = Single_Acc_T$Time)
+Alcohol = filter(Single, grepl(".*alcohol.*|influence", Single$Description, ignore.case = T))
+
+## Standardise times & dates
+W$DateTime = strptime(W$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
+Alcohol$DateTime = strptime(Alcohol$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
+Single$DateTime = strptime(Single$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
+Single_Acc$DateTime = strptime(Single_Acc$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
 
 ## Summary of different Races
-Single_Acc_T %>% 
+Single_Acc %>% 
+  select(-DateTime) %>% 
   group_by(Race) %>% 
-  select(c(Belts, `Personal Injury`, 
-           `Property Damage`, Fatal, Alcohol, `Work Zone`)) %>% 
+  select(c(Belts, `Personal Injury`, `Property Damage`, Fatal, Alcohol, `Work Zone`)) %>% 
   summarise_all(funs(mean))
 
 ## Distribution of accidents over the span of the day
-ggplot(Single_Acc_T, 
+ggplot(Single_Acc, 
        aes(Color, Time, col = Color)) + 
        geom_jitter(alpha = .3, width = .1) + 
-       scale_y_chron(format = "%H:%M:%S") +
-       theme(axis.text = element_text(angle = 45))
+       scale_y_chron(format = "%H:%M") +
+       theme(axis.text.x = element_text(angle = 75), 
+             legend.position = "bottom")
 
 ## representation of different Races committing violations
 quickplot(Race, data = Single, fill = Race)
-quickplot(Race, data = german, fill = Race)
+
 ## Time of the day against which different Races are in accidents
-ggplot(Single_Acc_T,
-       aes(Race, Time, col = Color)) +
-       geom_jitter(alpha = .4, width = .2) +
-       scale_y_chron(format = "%H:%M:%S")
+ggplot(Single_Acc,
+       aes(Race, Time, col = Gender)) +
+  geom_jitter(alpha = .7, width = .3) +
+  scale_y_chron(format = "%H:%M") + 
+  facet_grid(.~Gender)
+
+ggplot(Alcohol,
+       aes(Race, Time, col = Gender)) +
+  geom_jitter(alpha = .7, width = .3) +
+  scale_y_chron(format = "%H:%M") + 
+  facet_grid(.~Gender)  
 
 ## Intoxication vs Seatbelts
 ggplot(Single, aes(factor(Alcohol), factor(Belts), col = Race)) +
@@ -107,9 +119,3 @@ ggmap(Montgomery) +
              data = Alcohol,
              alpha = .3,
              size = 2)
-
-ggplot(Alcohol_T, aes(Date, Time)) + 
-  geom_line() + 
-  scale_y_chron(format = "%H:%M") + 
-  scale_x_continuous() +
-  coord_cartesian(xlim = c(0, 100))

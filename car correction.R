@@ -1,30 +1,30 @@
 ### car correction
-## 4S 4DR AMERICAN ADVA BLUE CAAB CARG CDI CHAN DEALER FREI FREIGHLINER FREIGHT TRUCK FREIGHTL FREIGHTLINER FREIGHTTK FRHT FRHTLNER FRIEGHTLINER
+## 4S 4DR AMERICAN ADVA BLUE CAAB CARG CDI CHAN DEALER
 
-x= filter(Single, grepl("[1-9][0-9].*MPH.*[0-9].", Single$Description, ignore.case = F))
+x= Single[grepl("[1-9][0-9].*MPH.*[0-9].", Single$Description, ignore.case = F), ]
 
-cars = x %>% distinct(Make, .keep_all = T) %>% arrange(Make) %>% select(c(Make, Model))
+cars = x %>% select(-DateTime) %>% distinct(Make, .keep_all = T) %>% arrange(Make) %>% select(c(Make, Model))
 
 x$Make = gsub("*che?v.*|.*rolet$|CGEVY|checy|cheb?y.*|GM$|.*HEV.*", "CHEVROLET", x$Make, ignore.case = T)
 x$Make = gsub(".*hyu.A?n.*|.*YUN.*|.*UND.*|.*YUM?DA|.*DAII?|.*HUY.*|.*SIS|HYI?N|ELA.*", 
               "HYUNDAI", x$Make, ignore.case = T)
 x$Make = gsub(".*ac?.ur.*|acru.*|acyra|ac.ua|a?C?ura|accu", "ACURA", x$Make, ignore.case = T)
-x$Make = gsub("accord|hon.*|.*NDA$|H0.*|HA?ND|WHITE|HODA", "HONDA", x$Make, ignore.case = T)
+x$Make = gsub("accord|hon.*|.*NDA$|H0.*|HA?ND|WHITE|HOB?DA", "HONDA", x$Make, ignore.case = T)
 x$Make = gsub("aud.*|AU", "AUDI", x$Make, ignore.case = T)
 x$Make = gsub("buii?c.*|buck|1995", "BUICK", x$Make, ignore.case = T)
 x$Make = gsub("cad.*", "CADILLAC", x$Make, ignore.case = T)
 x$Make = gsub("ch?r?.st?l.er|chryl?s?.*|chy?r.*|cH?r?ys.*|CRY|CRH.*",
               "CHRYSLER", x$Make, ignore.case = T)
 x$Make = gsub(".*dge.*|.*odg.*|.*DOD.*|DIDG|DOGE", "DODGE", x$Make, ignore.case = T)
-x$Make = gsub("mini.*|.*cooper", "MINI COOPER", x$Make, ignore.case = T)
+x$Make = gsub("mi[Mn]i.*|.*cooper|MINNI$", "MINI COOPER", x$Make, ignore.case = T)
 x$Make = gsub(".for?d|.*ord.*|for.*|MUS.*|.*PED.*|F1.*|FIRD|FR?OE?D|FPRD", "FORD", x$Make, ignore.case = T)
 x$Make = gsub("por.*", "PORSCHE", x$Make, ignore.case = T)
 x$Make = gsub("HARL.*", "HARLEY DAVIDSON", x$Make, ignore.case = T)
 x$Make = gsub("^DUC?K?.*", "DUCATI", x$Make, ignore.case = T)
-x$Make = gsub("^NI?SS.*|ALT.*|NII?SS?.*|.*IX.*", "NISSAN", x$Make, ignore.case = T)
+x$Make = gsub("^[MN]I?SS.*|ALT.*|NII?SS?.*|.*IX.*|MINNIAN", "NISSAN", x$Make, ignore.case = T)
 x$Make = gsub(".*TOY.*|.*OTA.*|tot.*|TI?PY.*|T0.*|SIEN|.*11|2007", "TOYOTA", x$Make, ignore.case = T)
 x$Make = gsub("^sub.*|.*aru.*", "SUBARU", x$Make, ignore.case = T)
-x$Make = gsub(".*SHI.*|.*TSI", "MITSUBISHI", x$Make, ignore.case = T)
+x$Make = gsub(".*SHI.*|.*TSI|.*TS.*", "MITSUBISHI", x$Make, ignore.case = T)
 x$Make = gsub("JE.*", "JEEP", x$Make, ignore.case = T)
 x$Make = gsub("BM.*|.*BW.*|B,w", "BMW", x$Make, ignore.case = T)
 x$Make = gsub(".*BENZ.*|merc.*[^uy]$|.*ze?de?s|merz.*|.*rd?ed.*|.*REZ.*", 
@@ -46,3 +46,5 @@ x$Make = gsub("BUEL$", "BUELL", x$Make)
 x$Make = gsub("CMC|GENEV.*", "GMC", x$Make)
 x$Make = gsub("EGIL", "EAGLE", x$Make)
 x$Make = gsub("FR.*", "FREIGHTLINER", x$Make)
+x$Make = gsub("ERIC", "AMERICAN", x$Make)
+x$Make = gsub("^[^AFPVM].*IA|YUD", "KIA", x$Make)
