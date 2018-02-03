@@ -2,6 +2,7 @@ library(tidyverse)
 library(chron)
 library(Hmisc)
 library(ggmap)
+library(lubridate)
 
 ## Combine date and time into one column and arrange df by this new variable
 W = Traffic_Violations %>% 
@@ -66,6 +67,10 @@ Alcohol$DateTime = strptime(Alcohol$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
 Single$DateTime = strptime(Single$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
 Single_Acc$DateTime = strptime(Single_Acc$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
 
+## Make year columns
+Single$year = year(Single$DateTime)
+Single_Acc$year = year(Single_Acc$DateTime)
+
 ## Summary of different Races
 Single_Acc %>% 
   select(-DateTime) %>% 
@@ -89,13 +94,15 @@ ggplot(Single_Acc,
        aes(Race, Time, col = Gender)) +
   geom_jitter(alpha = .7, width = .3) +
   scale_y_chron(format = "%H:%M") + 
-  facet_grid(.~Gender)
+  facet_grid(Gender~year) +
+  theme(axis.text.x = element_text(angle = 75))
 
 ggplot(Alcohol,
        aes(Race, Time, col = Gender)) +
   geom_jitter(alpha = .7, width = .3) +
   scale_y_chron(format = "%H:%M") + 
-  facet_grid(.~Gender)  
+  facet_grid(Gender~Belts) +
+  theme(axis.text.x = element_text(angle = 75))
 
 ## Intoxication vs Seatbelts
 ggplot(Single, aes(factor(Alcohol), factor(Belts), col = Race)) +
