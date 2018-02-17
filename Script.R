@@ -2,6 +2,7 @@ library(tidyverse)
 library(chron)
 library(Hmisc)
 library(ggmap)
+library(lubridate)
 
 ## Combine date and time into one column and arrange df by this new variable
 W = Traffic_Violations %>% 
@@ -59,12 +60,25 @@ Single_Acc = Single %>%
 ## Create a data frame accounting for only alcohol-involved incidents
 
 Alcohol = filter(Single, grepl(".*alcohol.*|influence", Single$Description, ignore.case = T))
+<<<<<<< HEAD
 
 ## Standardise times & dates
 W$DateTime = strptime(W$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
 Alcohol$DateTime = strptime(Alcohol$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
 Single$DateTime = strptime(Single$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
 Single_Acc$DateTime = strptime(Single_Acc$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
+=======
+
+## Standardise times & dates
+W$DateTime = strptime(W$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
+Alcohol$DateTime = strptime(Alcohol$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
+Single$DateTime = strptime(Single$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
+Single_Acc$DateTime = strptime(Single_Acc$DateTime, "%m/%d/%Y %H:%M:%S", tz = "EST")
+
+## Make year columns
+Single$year = year(Single$DateTime)
+Single_Acc$year = year(Single_Acc$DateTime)
+>>>>>>> 8d5b6f8273eef64e4e6bed2a8ee61a46fcd07109
 
 ## Summary of different Races
 Single_Acc %>% 
@@ -89,13 +103,23 @@ ggplot(Single_Acc,
        aes(Race, Time, col = Gender)) +
   geom_jitter(alpha = .7, width = .3) +
   scale_y_chron(format = "%H:%M") + 
+<<<<<<< HEAD
   facet_grid(.~Gender)
+=======
+  facet_grid(Gender~year) +
+  theme(axis.text.x = element_text(angle = 75))
+>>>>>>> 8d5b6f8273eef64e4e6bed2a8ee61a46fcd07109
 
 ggplot(Alcohol,
        aes(Race, Time, col = Gender)) +
   geom_jitter(alpha = .7, width = .3) +
   scale_y_chron(format = "%H:%M") + 
+<<<<<<< HEAD
   facet_grid(.~Gender)  
+=======
+  facet_grid(Gender~Belts) +
+  theme(axis.text.x = element_text(angle = 75))
+>>>>>>> 8d5b6f8273eef64e4e6bed2a8ee61a46fcd07109
 
 ## Intoxication vs Seatbelts
 ggplot(Single, aes(factor(Alcohol), factor(Belts), col = Race)) +
